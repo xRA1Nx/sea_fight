@@ -1,3 +1,17 @@
+class Dot:
+    def __init__(self, x="", y=""):
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def __str__(self):
+        return f"точка {self.y}{self.x}"
+
+
+
+
 a1 = Dot("1", "a")
 a2 = Dot("2", "a")
 a3 = Dot("3", "a")
@@ -44,3 +58,4 @@ f6 = Dot("6", "f")
 # or (d == "vertical" and sh_dot[1] == fr_point[1] and abs(
 #     int(sh_dot[0]) - int(fr_point[0])) == 1) and fr_point not in item.dots \
 # or (d == "horisontal" and sh_dot[0] == fr_point[0] and abs(int(sh_dot[1]) - int(fr_point[1])) == 1) and fr_point not in item.dots:
+
