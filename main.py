@@ -150,24 +150,28 @@ def ii_shot(ii_free_turns):
     priority_turns = []
     for ship in player_desk.ships_list:
         if ship.status == "wounded":
-            # if ship.size == 3 and ship.lifes == 1:
-            #     temp = list(map(lambda x: x if player_desk.board[int(x[0])][int(x[1])] == "| X |", ship.dots))
-            #     if abs(int(temp[0])-int(temp[1])) == 1 and mi:
-            #         priority_turns = [min(temp, key=int)]
-            #         break
+            if ship.size == 3 and ship.lifes == 1:
+                temp = list(filter(lambda x: player_desk.board[int(x[0])][int(x[1])] == "| X |", ship.dots))
+                delta = abs(int(temp[0]) - int(temp[1]))
+                min_dot = str(int(min(temp, key=int)) - delta)
+                max_dot = str(int(max(temp, key=int)) + delta)
+                temp = list(filter(lambda x: x in ii_free_turns, [min_dot, max_dot]))
+                priority_turns = temp.copy()
+                break
             for dot in ship.dots:
                 if player_desk.board[int(dot[0])][int(dot[1])] == "| X |":
                     for f in ii_free_turns:
                         if (abs(int(f[0]) - int(dot[0])) == 1 and abs(int(f[1]) - int(dot[1])) == 0
-                                and player_desk.board[int(f[0])][int(f[1])] != "| X |") \
-                            or (abs(int(f[0]) - int(dot[0])) == 0 and abs(int(f[1]) - int(dot[1])) == 1
-                                and player_desk.board[int(f[0])][int(f[1])] != "| X |"):
+                            and player_desk.board[int(f[0])][int(f[1])] != "| X |") \
+                                or (abs(int(f[0]) - int(dot[0])) == 0 and abs(int(f[1]) - int(dot[1])) == 1
+                                    and player_desk.board[int(f[0])][int(f[1])] != "| X |"):
                             priority_turns.append(f)
                     break
     if priority_turns:
         turn = priority_turns[randrange(len(priority_turns))]
     else:
         turn = ii_free_turns[randrange(len(ii_free_turns))]
+
     print("ход противника: ", chr(96 + int(turn[1])).upper() + turn[0])
     if player_desk.board[int(turn[0])][int(turn[1])] == "| O |":
         player_desk.board[int(turn[0])][int(turn[1])] = "| - |"
@@ -283,10 +287,10 @@ def game():
         for dot in ship.dots:
             player_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
 
-    # размещаем корабли противника на доске
-    for ship in ii_desk.ships_list:
-        for dot in ship.dots:
-            ii_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
+    # # размещаем корабли противника на доске (!!!ДЛЯ ОТЛАДКИ!!!)
+    # for ship in ii_desk.ships_list:
+    #     for dot in ship.dots:
+    #         ii_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
 
     while any([player_desk.count_live_ships, ii_desk.count_live_ships]):
         if player_desk.count_live_ships == 0:
