@@ -230,10 +230,15 @@ class Board:
             print(*raw)
 
     # Проверка после выстрела компьютера (очерчиваем убитые корабли, считаем оставшиеся жизни)
-    def check_ii(self, ft):
+    def check(self, ft):
         counter = 0
         for ship in self.ships_list:
-            ship.lifes = sum(map(lambda x: 1 if player_desk.board[int(x[0])][int(x[1])] == "| ■ |" else 0, ship.dots))
+            if self == player_desk:
+                ship.lifes = sum(
+                    map(lambda x: 1 if player_desk.board[int(x[0])][int(x[1])] == "| ■ |" else 0, ship.dots))
+            else:
+                ship.lifes = ship.size - sum(map(lambda x: 1 if ii_desk.board[int(x[0])][int(x[1])] == "| X |"
+                else 0, ship.dots))
             if ship.lifes > 0:
                 counter += 1
             else:
@@ -244,25 +249,6 @@ class Board:
                                     self.board[int(f[0])][int(f[1])] != "| X |") \
                                 or (abs(int(f[0]) - int(dot[0])) == 0 and abs(int(f[1]) - int(dot[1])) == 1 and
                                     self.board[int(f[0])][int(f[1])] != "| X |"):
-                            self.board[int(f[0])][int(f[1])] = "| - |"
-            self.count_live_ships = counter
-
-    # Проверка после выстрела игрока (очерчиваем убитые корабли, считаем оставшиеся жизни)
-    def check_pl(self, pl_free_turns):
-        counter = 0
-        for ship in self.ships_list:
-            ship.lifes = ship.size - sum(map(lambda x: 1 if ii_desk.board[int(x[0])][int(x[1])] == "| X |"
-            else 0, ship.dots))
-            if ship.lifes > 0:
-                counter += 1
-            else:
-                for f in pl_free_turns:
-                    for dot in ship.dots:
-                        if abs(int(f[0]) - int(dot[0])) == 1 and abs(int(f[1]) - int(dot[1])) == 1 \
-                                or (abs(int(f[0]) - int(dot[0])) == 1 and abs(int(f[1]) - int(dot[1])) == 0
-                                    and self.board[int(f[0])][int(f[1])] != "| X |") \
-                                or (abs(int(f[0]) - int(dot[0])) == 0 and abs(int(f[1]) - int(dot[1])) == 1
-                                    and self.board[int(f[0])][int(f[1])] != "| X |"):
                             self.board[int(f[0])][int(f[1])] = "| - |"
             self.count_live_ships = counter
 
@@ -287,10 +273,10 @@ def game():
         for dot in ship.dots:
             player_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
 
-    # # размещаем корабли противника на доске (!!!ДЛЯ ОТЛАДКИ!!!)
-    # for ship in ii_desk.ships_list:
-    #     for dot in ship.dots:
-    #         ii_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
+    # размещаем корабли противника на доске (!!!ДЛЯ ОТЛАДКИ!!!)
+    for ship in ii_desk.ships_list:
+        for dot in ship.dots:
+            ii_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
 
     while any([player_desk.count_live_ships, ii_desk.count_live_ships]):
         if player_desk.count_live_ships == 0:
@@ -300,24 +286,24 @@ def game():
 
         # ходит игрок
         flag_pl_hit, hit_massage = player_shot()
-        ii_desk.check_pl(pl_free_turns)
+        ii_desk.check(pl_free_turns)
         while flag_pl_hit and ii_desk.count_live_ships:
-            ii_desk.check_pl(pl_free_turns)
             show_game()
             print("\n\t", hit_massage)
             print("\t\t\t\t\tВЫ СТРЕЛЯЕТЕ СНОВА")
             flag_pl_hit, hit_massage = player_shot()
+            ii_desk.check(pl_free_turns)
         if ii_desk.count_live_ships == 0:
             print("Поздравляем, вы победили")
             break
 
         # Ходит компьютер
         flag_ii_hit = ii_shot(ii_free_turns)
-        player_desk.check_ii(ii_free_turns)
+        player_desk.check(ii_free_turns)
         while flag_ii_hit and player_desk.count_live_ships:
             ii_free_turns_refresh()
             flag_ii_hit = ii_shot(ii_free_turns)
-            player_desk.check_ii(ii_free_turns)
+            player_desk.check(ii_free_turns)
         ii_free_turns_refresh()
 
 
