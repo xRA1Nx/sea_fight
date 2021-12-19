@@ -1,33 +1,27 @@
 from random import randrange
 
-
 # функция генерации кораблей. Размещаем коробаль по одному от больших к маленьким,
 # если кораблю не хватает место, то генерация запускается по новой
-
-
 def generat_ship_list():
-    h = None
     filled_area = set()
-    sizes = [3, 2, 1]
+    sizes = [3, 2, 2, 1, 1, 1, 1]
     dir_list = ["vertical", "horisontal"]
     ship_list = []
     free_points = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
 
     def refresh_freepoints_and_field_area(fp, item, fa):
         fp = sorted(list(set(fp) - set(item.dots)))
-        for fr_point in fp:
-            for sh_dot in item.dots:
-                if abs(int(sh_dot[0]) - int(fr_point[0])) == 1 and abs(int(sh_dot[1]) - int(fr_point[1])) == 1 \
-                        or abs(int(sh_dot[0]) - int(fr_point[0])) == 1 and abs(int(sh_dot[1]) - int(fr_point[1])) == 0 \
-                        or abs(int(sh_dot[0]) - int(fr_point[0])) == 0 and abs(int(sh_dot[1]) - int(fr_point[1])) == 1:
-                    fa.add(fr_point)
+        for f in fp:
+            for dot in item.dots:
+                if abs(int(dot[0]) - int(f[0])) == 1 and abs(int(dot[1]) - int(f[1])) == 1 \
+                        or abs(int(dot[0]) - int(f[0])) == 1 and abs(int(dot[1]) - int(f[1])) == 0 \
+                        or abs(int(dot[0]) - int(f[0])) == 0 and abs(int(dot[1]) - int(f[1])) == 1:
+                    fa.add(f)
         fp = sorted(list(set(free_points) - set(item.dots) - fa))
         ship_list.append(item)
-
         return fp, fa
 
     # обновление списка возможных точек размещения головы коробля
-
     def refresh_temp(fp, size):
         t = fp.copy()
         if dir == "vertical":
@@ -50,60 +44,17 @@ def generat_ship_list():
                             t.remove(fp[i - 1])
         return t
 
-    # генерация расположения головы коробля и направления корабля
-
-    def operation():
-        nonlocal dir, temp, h
+    for s in sizes:
         dir = dir_list[randrange(2)]
         temp = refresh_temp(free_points, s)
         if temp:
             h = temp[randrange(len(temp))]  # голова коробля
         else:
             h = None
-        return dir, temp, h
-
-    for s in sizes:
-        if s == 3:
-            dir, temp, h = operation()
-            big_ship = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, big_ship, filled_area)
-        elif s == 2:
-            if not h:
-                return generat_ship_list()
-            dir, temp, h = operation()
-            medium_ship1 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, medium_ship1, filled_area)
-
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            medium_ship2 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, medium_ship2, filled_area)
-
-        elif s == 1:
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            small_ship1 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, small_ship1, filled_area)
-
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            small_ship2 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, small_ship2, filled_area)
-
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            small_ship3 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, small_ship3, filled_area)
-
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            small_ship4 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, small_ship4, filled_area)
+        if not h:
+            return generat_ship_list()
+        ship = Ship(size=s, head=h, direction=dir, lifes=s)
+        free_points, filled_area = refresh_freepoints_and_field_area(free_points, ship, filled_area)
     return ship_list
 
 
@@ -153,8 +104,7 @@ def ii_shot(ii_free_turns):
             if ship.size == 3 and ship.lifes == 1:
                 temp = list(filter(lambda x: player_desk.board[int(x[0])][int(x[1])] == "| X |", ship.dots))
                 delta = abs(int(temp[0]) - int(temp[1]))
-                min_dot = str(int(min(temp, key=int)) - delta)
-                max_dot = str(int(max(temp, key=int)) + delta)
+                min_dot, max_dot = str(int(min(temp, key=int)) - delta), str(int(max(temp, key=int)) + delta)
                 temp = list(filter(lambda x: x in ii_free_turns, [min_dot, max_dot]))
                 priority_turns = temp.copy()
                 break
@@ -190,8 +140,7 @@ def ii_shot(ii_free_turns):
 def show_game():
     print("\nВаше игровое поле")
     player_desk.show_board()
-    print()
-    print("Поле противника")
+    print("\nПоле противника")
     ii_desk.show_board()
 
 
