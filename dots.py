@@ -12,3 +12,33 @@ class Dot:
 
 
 
+
+ship_list=[]
+
+class Ship:
+    status = "full"
+
+    def __init__(self, size=0, head="", direction="", lifes=0):
+        self.size = size
+        self.head = head
+        self.direction = direction
+        self.lifes = lifes
+
+    def __str__(self):
+        return f"корабль {self.size}"
+
+
+    @property
+    def dots(self):
+        if self.direction == "horisontal":
+            return [self.head[0] + str(int(self.head[1]) + i) for i in range(self.size)]
+        else:
+            return [str(int(self.head[0]) + i) + self.head[1] for i in range(self.size)]
+
+sizes = [3,2,2,1,1,1,1]
+for s in sizes:
+    a= Ship(s,11,"верх",s)
+    ship_list.append(a)
+
+
+print(a)

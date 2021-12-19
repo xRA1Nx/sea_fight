@@ -273,10 +273,10 @@ def game():
         for dot in ship.dots:
             player_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
 
-    # размещаем корабли противника на доске (!!!ДЛЯ ОТЛАДКИ!!!)
-    for ship in ii_desk.ships_list:
-        for dot in ship.dots:
-            ii_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
+    # # размещаем корабли противника на доске (!!!ДЛЯ ОТЛАДКИ!!!)
+    # for ship in ii_desk.ships_list:
+    #     for dot in ship.dots:
+    #         ii_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
 
     while any([player_desk.count_live_ships, ii_desk.count_live_ships]):
         if player_desk.count_live_ships == 0:

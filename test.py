@@ -8,7 +8,7 @@ from random import randrange
 def generat_ship_list():
     h = None
     filled_area = set()
-    sizes = [3, 2, 1]
+    sizes = [3, 2, 2, 1, 1, 1, 1]
     dir_list = ["vertical", "horisontal"]
     ship_list = []
     free_points = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
@@ -63,47 +63,10 @@ def generat_ship_list():
         return dir, temp, h
 
     for s in sizes:
-        if s == 3:
-            dir, temp, h = operation()
-            big_ship = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, big_ship, filled_area)
-        elif s == 2:
-            if not h:
-                return generat_ship_list()
-            dir, temp, h = operation()
-            medium_ship1 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, medium_ship1, filled_area)
+        dir, temp, h = operation()
+        ship = Ship(size=s, head=h, direction=dir, lifes=s)
+        free_points, filled_area = refresh_freepoints_and_field_area(free_points, ship, filled_area)
 
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            medium_ship2 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, medium_ship2, filled_area)
-
-        elif s == 1:
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            small_ship1 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, small_ship1, filled_area)
-
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            small_ship2 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, small_ship2, filled_area)
-
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            small_ship3 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, small_ship3, filled_area)
-
-            dir, temp, h = operation()
-            if not h:
-                return generat_ship_list()
-            small_ship4 = Ship(size=s, head=h, direction=dir, lifes=s)
-            free_points, filled_area = refresh_freepoints_and_field_area(free_points, small_ship4, filled_area)
     return ship_list
 
 
