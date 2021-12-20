@@ -1,5 +1,6 @@
 from random import randrange
 
+
 # функция генерации кораблей. Размещаем коробаль по одному от больших к маленьким,
 # если кораблю не хватает место, то генерация запускается по новой
 def generat_ship_list():
@@ -9,19 +10,20 @@ def generat_ship_list():
     ship_list = []
     free_points = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
 
+    # убираем из свободных точек
     def refresh_freepoints_and_field_area(fp, item, fa):
-        fp = sorted(list(set(fp) - set(item.dots)))
+        fp = sorted(list(set(fp) - set(item.dotvalues)))
         for f in fp:
             for dot in item.dots:
-                if abs(int(dot[0]) - int(f[0])) == 1 and abs(int(dot[1]) - int(f[1])) == 1 \
-                        or abs(int(dot[0]) - int(f[0])) == 1 and abs(int(dot[1]) - int(f[1])) == 0 \
-                        or abs(int(dot[0]) - int(f[0])) == 0 and abs(int(dot[1]) - int(f[1])) == 1:
+                if abs(int(dot.v[0]) - int(f[0])) == 1 and abs(int(dot.v[1]) - int(f[1])) == 1 \
+                        or abs(int(dot.v[0]) - int(f[0])) == 1 and abs(int(dot.v[1]) - int(f[1])) == 0 \
+                        or abs(int(dot.v[0]) - int(f[0])) == 0 and abs(int(dot.v[1]) - int(f[1])) == 1:
                     fa.add(f)
-        fp = sorted(list(set(free_points) - set(item.dots) - fa))
+        fp = sorted(list(set(free_points) - set(item.dotvalues) - fa))
         ship_list.append(item)
         return fp, fa
 
-    # обновление списка возможных точек размещения головы коробля
+    # обновление temp файла, копирующего спискок возможных точек размещения головы коробля
     def refresh_temp(fp, size):
         t = fp.copy()
         if dir == "vertical":
@@ -77,9 +79,10 @@ def player_shot():
         except ValueError as e:
             print(e)
         else:
+            turn = Dot(turn[1] + str(ord(turn[0]) - 96))
             for ship in ii_desk.ships_list:
-                if turn[1] + str(ord(turn[0]) - 96) in ship.dots:
-                    ii_desk.board[int(turn[1])][ord(turn[0]) - 96] = "| X |"
+                if turn.v in ship.dotvalues:
+                    ii_desk.board[turn.x][turn.y] = "| X |"
                     hit = True
                     if ship.lifes > 1:
                         massage = "\t\t\t\t\t\t\tпопадание!\n"
@@ -87,7 +90,7 @@ def player_shot():
                         massage = "\t\t\t\t\t\t\tУничтожен!!\n"
                     return hit, massage
             else:
-                ii_desk.board[int(turn[1])][ord(turn[0]) - 96] = "| - |"
+                ii_desk.board[turn.x][turn.y] = "| - |"
                 massage = "\t\t\t\t\t\t\t\tВы промахнулись!!!\n"
                 print(massage)
                 return hit, massage
@@ -102,34 +105,35 @@ def ii_shot(ii_free_turns):
     for ship in player_desk.ships_list:
         if ship.status == "wounded":
             if ship.size == 3 and ship.lifes == 1:
-                temp = list(filter(lambda x: player_desk.board[int(x[0])][int(x[1])] == "| X |", ship.dots))
-                delta = abs(int(temp[0]) - int(temp[1]))
-                min_dot, max_dot = str(int(min(temp, key=int)) - delta), str(int(max(temp, key=int)) + delta)
+                temp = list(filter(lambda d: player_desk.board[d.x][d.y] == "| X |", ship.dots))
+                delta = abs(int(temp[0].v) - int(temp[1].v))
+                min_dot = str(int(min(temp, key=lambda d: d.v).v) - delta)
+                max_dot = str(int(max(temp, key=lambda d: d.v).v) + delta)
                 temp = list(filter(lambda x: x in ii_free_turns, [min_dot, max_dot]))
                 priority_turns = temp.copy()
                 break
             for dot in ship.dots:
-                if player_desk.board[int(dot[0])][int(dot[1])] == "| X |":
-                    for f in ii_free_turns:
-                        if (abs(int(f[0]) - int(dot[0])) == 1 and abs(int(f[1]) - int(dot[1])) == 0
-                            and player_desk.board[int(f[0])][int(f[1])] != "| X |") \
-                                or (abs(int(f[0]) - int(dot[0])) == 0 and abs(int(f[1]) - int(dot[1])) == 1
-                                    and player_desk.board[int(f[0])][int(f[1])] != "| X |"):
-                            priority_turns.append(f)
+                if player_desk.board[dot.x][dot.y] == "| X |":
+                    for ft in ii_free_turns:
+                        f = Dot(ft)
+                        if (abs(f.x - dot.x) == 1 and abs(f.y - dot.y) == 0 and player_desk.board[f.x][f.y] != "| X |")\
+                        or (abs(f.x - dot.x) == 0 and abs(f.y - dot.y) == 1 and player_desk.board[f.x][f.y] != "| X |"):
+                            priority_turns.append(ft)
                     break
     if priority_turns:
         turn = priority_turns[randrange(len(priority_turns))]
     else:
         turn = ii_free_turns[randrange(len(ii_free_turns))]
-
     print("ход противника: ", chr(96 + int(turn[1])).upper() + turn[0])
-    if player_desk.board[int(turn[0])][int(turn[1])] == "| O |":
-        player_desk.board[int(turn[0])][int(turn[1])] = "| - |"
+    turn = Dot(turn)
+
+    if player_desk.board[turn.x][turn.y] == "| O |":
+        player_desk.board[turn.x][turn.y] = "| - |"
     else:
-        player_desk.board[int(turn[0])][int(turn[1])] = "| X |"
+        player_desk.board[turn.x][turn.y] = "| X |"
 
         for ship in player_desk.ships_list:
-            if turn in ship.dots:
+            if turn.v in ship.dotvalues:
                 ship.lifes -= 1
                 if ship.lifes != ship.size and ship.lifes != 0:
                     ship.status = "wounded"
@@ -142,6 +146,13 @@ def show_game():
     player_desk.show_board()
     print("\nПоле противника")
     ii_desk.show_board()
+
+
+class Dot:
+    def __init__(self, ind=""):
+        self.x = int(ind[0])
+        self.y = int(ind[1])
+        self.v = ind
 
 
 class Ship:
@@ -159,9 +170,16 @@ class Ship:
     @property
     def dots(self):
         if self.direction == "horisontal":
-            return [self.head[0] + str(int(self.head[1]) + i) for i in range(self.size)]
+            ship_dots = [Dot(self.head[0] + str(int(self.head[1]) + i)) for i in range(self.size)]
+            return ship_dots
         else:
-            return [str(int(self.head[0]) + i) + self.head[1] for i in range(self.size)]
+            ship_dots = [Dot(str(int(self.head[0]) + i) + self.head[1]) for i in range(self.size)]
+            return ship_dots
+
+    @property
+    def dotvalues(self):
+        vals = [dot.v for dot in self.dots]
+        return vals
 
 
 class Board:
@@ -178,27 +196,28 @@ class Board:
             raw = list(map(lambda x: x.ljust(2), raw))
             print(*raw)
 
-    # Проверка после выстрела компьютера (очерчиваем убитые корабли, считаем оставшиеся жизни)
+    # Проверка после выстрела (очерчиваем убитые корабли, считаем оставшиеся жизни)
     def check(self, ft):
         counter = 0
         for ship in self.ships_list:
             if self == player_desk:
                 ship.lifes = sum(
-                    map(lambda x: 1 if player_desk.board[int(x[0])][int(x[1])] == "| ■ |" else 0, ship.dots))
+                    map(lambda d: 1 if player_desk.board[d.x][d.y] == "| ■ |" else 0, ship.dots))
             else:
-                ship.lifes = ship.size - sum(map(lambda x: 1 if ii_desk.board[int(x[0])][int(x[1])] == "| X |"
+                ship.lifes = ship.size - sum(map(lambda d: 1 if ii_desk.board[d.x][d.y] == "| X |"
                 else 0, ship.dots))
             if ship.lifes > 0:
                 counter += 1
             else:
-                for f in ft:
+                for ind in ft:
+                    f = Dot(ind)
                     for dot in ship.dots:
-                        if abs(int(f[0]) - int(dot[0])) == 1 and abs(int(f[1]) - int(dot[1])) == 1 \
-                                or (abs(int(f[0]) - int(dot[0])) == 1 and abs(int(f[1]) - int(dot[1])) == 0 and
-                                    self.board[int(f[0])][int(f[1])] != "| X |") \
-                                or (abs(int(f[0]) - int(dot[0])) == 0 and abs(int(f[1]) - int(dot[1])) == 1 and
-                                    self.board[int(f[0])][int(f[1])] != "| X |"):
-                            self.board[int(f[0])][int(f[1])] = "| - |"
+                        if abs(f.x - dot.x) == 1 and abs(f.y - dot.y) == 1 \
+                                or (abs(f.x - dot.x) == 1 and abs(f.y - dot.y) == 0 and
+                                    self.board[f.x][f.y] != "| X |") \
+                                or (abs(f.x - dot.x) == 0 and abs(f.y - dot.y) == 1 and
+                                    self.board[f.x][f.y] != "| X |"):
+                            self.board[f.x][f.y] = "| - |"
             self.count_live_ships = counter
 
 
@@ -220,16 +239,17 @@ def game():
     # размещаем корабли игрока на доске
     for ship in player_desk.ships_list:
         for dot in ship.dots:
-            player_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
+            player_desk.board[dot.x][dot.y] = "| ■ |"
 
-    # # размещаем корабли противника на доске (!!!ДЛЯ ОТЛАДКИ!!!)
-    # for ship in ii_desk.ships_list:
-    #     for dot in ship.dots:
-    #         ii_desk.board[int(dot[0])][int(dot[1])] = "| ■ |"
+    #размещаем корабли противника на доске (!!!ДЛЯ ОТЛАДКИ!!!)
+    for ship in ii_desk.ships_list:
+        for dot in ship.dots:
+            ii_desk.board[dot.x][dot.y] = "| ■ |"
 
     while any([player_desk.count_live_ships, ii_desk.count_live_ships]):
         if player_desk.count_live_ships == 0:
-            print("вы проиграли")
+            show_game()
+            print("\n>>>>>> Вы проиграли :(  <<<<<<")
             break
         show_game()
 
@@ -243,7 +263,8 @@ def game():
             flag_pl_hit, hit_massage = player_shot()
             ii_desk.check(pl_free_turns)
         if ii_desk.count_live_ships == 0:
-            print("Поздравляем, вы победили")
+            show_game()
+            print("\n>>>>>> Поздравляем, вы победили! <<<<<<")
             break
 
         # Ходит компьютер
