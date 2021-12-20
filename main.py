@@ -264,7 +264,7 @@ def game():
             ii_desk.check(pl_free_turns)
         if ii_desk.count_live_ships == 0:
             show_game()
-            print("\n>>>>>> Поздравляем, вы победили! <<<<<<")
+            print("\n>>>>>> Поздравляем, Вы победили! <<<<<<")
             break
 
         # Ходит компьютер
