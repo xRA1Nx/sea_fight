@@ -212,11 +212,9 @@ class Board:
                 for ind in ft:
                     f = Dot(ind)
                     for dot in ship.dots:
-                        if abs(f.x - dot.x) == 1 and abs(f.y - dot.y) == 1 \
-                                or (abs(f.x - dot.x) == 1 and abs(f.y - dot.y) == 0 and
-                                    self.board[f.x][f.y] != "| X |") \
-                                or (abs(f.x - dot.x) == 0 and abs(f.y - dot.y) == 1 and
-                                    self.board[f.x][f.y] != "| X |"):
+                        if abs(f.x-dot.x) == 1 and abs(f.y-dot.y) == 1 \
+                        or (abs(f.x-dot.x) == 1 and abs(f.y-dot.y) == 0 and self.board[f.x][f.y] != "| X |")\
+                        or (abs(f.x-dot.x) == 0 and abs(f.y-dot.y) == 1 and self.board[f.x][f.y] != "| X |"):
                             self.board[f.x][f.y] = "| - |"
             self.count_live_ships = counter
 
@@ -240,11 +238,6 @@ def game():
     for ship in player_desk.ships_list:
         for dot in ship.dots:
             player_desk.board[dot.x][dot.y] = "| ■ |"
-
-    #размещаем корабли противника на доске (!!!ДЛЯ ОТЛАДКИ!!!)
-    for ship in ii_desk.ships_list:
-        for dot in ship.dots:
-            ii_desk.board[dot.x][dot.y] = "| ■ |"
 
     while any([player_desk.count_live_ships, ii_desk.count_live_ships]):
         if player_desk.count_live_ships == 0:
