@@ -164,9 +164,6 @@ class Ship:
         self.direction = direction
         self.lifes = lifes
 
-    def __str__(self):
-        return f"корабль {self.dots}"
-
     @property
     def dots(self):
         if self.direction == "horisontal":
