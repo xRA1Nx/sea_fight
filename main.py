@@ -1,35 +1,5 @@
 from random import randrange
-
-
-class Dot:
-    def __init__(self, ind=""):
-        self.x = int(ind[0])
-        self.y = int(ind[1])
-        self.v = ind
-
-
-class Ship:
-    status = "full"
-
-    def __init__(self, size=0, head="", direction="", lifes=0):
-        self.size = size
-        self.head = head
-        self.direction = direction
-        self.lifes = lifes
-
-    @property
-    def dots(self):
-        if self.direction == "horisontal":
-            ship_dots = [Dot(self.head[0] + str(int(self.head[1]) + i)) for i in range(self.size)]
-            return ship_dots
-        else:
-            ship_dots = [Dot(str(int(self.head[0]) + i) + self.head[1]) for i in range(self.size)]
-            return ship_dots
-
-    @property
-    def dotvalues(self):
-        vals = [dot.v for dot in self.dots]
-        return vals
+from clasess import Dot, Ship
 
 
 class Board:
@@ -67,6 +37,54 @@ class Board:
                         or (abs(f.x-dot.x) == 0 and abs(f.y-dot.y) == 1 and self.board[f.x][f.y] != "| X |"):
                             self.board[f.x][f.y] = "| - |"
             self.count_live_ships = counter
+
+
+# Главная функция игры
+def game():
+    ii_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
+    pl_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
+
+    # рефрешим список свободных выстрелов для ИИ
+    def ii_free_turns_refresh():
+        for raw in range(len(player_desk.board)):
+            for i in range(len(player_desk.board[raw])):
+                if player_desk.board[raw][i] in ["| - |", "| X |"] and str(raw) + str(i) in ii_free_turns:
+                    ii_free_turns.remove(str(raw) + str(i))
+
+    # размещаем корабли игрока на доске
+    for ship in player_desk.ships_list:
+        for dot in ship.dots:
+            player_desk.board[dot.x][dot.y] = "| ■ |"
+
+    while any([player_desk.count_live_ships, ii_desk.count_live_ships]):
+        if player_desk.count_live_ships == 0:
+            show_game()
+            print("\n>>>>>> Вы проиграли :(  <<<<<<")
+            break
+        show_game()
+
+        # ходит игрок
+        flag_pl_hit, hit_massage = player_shot()
+        ii_desk.check(pl_free_turns)
+        while flag_pl_hit and ii_desk.count_live_ships:
+            show_game()
+            print("\n\t", hit_massage)
+            print("\t\t\t\t\tВЫ СТРЕЛЯЕТЕ СНОВА")
+            flag_pl_hit, hit_massage = player_shot()
+            ii_desk.check(pl_free_turns)
+        if ii_desk.count_live_ships == 0:
+            show_game()
+            print("\n>>>>>> Поздравляем, Вы победили! <<<<<<")
+            break
+
+        # Ходит компьютер
+        flag_ii_hit = ii_shot(ii_free_turns)
+        player_desk.check(ii_free_turns)
+        while flag_ii_hit and player_desk.count_live_ships:
+            ii_free_turns_refresh()
+            flag_ii_hit = ii_shot(ii_free_turns)
+            player_desk.check(ii_free_turns)
+        ii_free_turns_refresh()
 
 
 # функция генерации кораблей. Размещаем коробаль по одному от больших к маленьким,
@@ -214,53 +232,6 @@ def show_game():
     player_desk.show_board()
     print("\nПоле противника")
     ii_desk.show_board()
-
-
-def game():
-    ii_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
-    pl_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
-
-    # рефрешим список свободных выстрелов для ИИ
-    def ii_free_turns_refresh():
-        for raw in range(len(player_desk.board)):
-            for i in range(len(player_desk.board[raw])):
-                if player_desk.board[raw][i] in ["| - |", "| X |"] and str(raw) + str(i) in ii_free_turns:
-                    ii_free_turns.remove(str(raw) + str(i))
-
-    # размещаем корабли игрока на доске
-    for ship in player_desk.ships_list:
-        for dot in ship.dots:
-            player_desk.board[dot.x][dot.y] = "| ■ |"
-
-    while any([player_desk.count_live_ships, ii_desk.count_live_ships]):
-        if player_desk.count_live_ships == 0:
-            show_game()
-            print("\n>>>>>> Вы проиграли :(  <<<<<<")
-            break
-        show_game()
-
-        # ходит игрок
-        flag_pl_hit, hit_massage = player_shot()
-        ii_desk.check(pl_free_turns)
-        while flag_pl_hit and ii_desk.count_live_ships:
-            show_game()
-            print("\n\t", hit_massage)
-            print("\t\t\t\t\tВЫ СТРЕЛЯЕТЕ СНОВА")
-            flag_pl_hit, hit_massage = player_shot()
-            ii_desk.check(pl_free_turns)
-        if ii_desk.count_live_ships == 0:
-            show_game()
-            print("\n>>>>>> Поздравляем, Вы победили! <<<<<<")
-            break
-
-        # Ходит компьютер
-        flag_ii_hit = ii_shot(ii_free_turns)
-        player_desk.check(ii_free_turns)
-        while flag_ii_hit and player_desk.count_live_ships:
-            ii_free_turns_refresh()
-            flag_ii_hit = ii_shot(ii_free_turns)
-            player_desk.check(ii_free_turns)
-        ii_free_turns_refresh()
 
 
 if __name__ == "__main__":
