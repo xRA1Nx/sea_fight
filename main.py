@@ -1,6 +1,74 @@
 from random import randrange
 
 
+class Dot:
+    def __init__(self, ind=""):
+        self.x = int(ind[0])
+        self.y = int(ind[1])
+        self.v = ind
+
+
+class Ship:
+    status = "full"
+
+    def __init__(self, size=0, head="", direction="", lifes=0):
+        self.size = size
+        self.head = head
+        self.direction = direction
+        self.lifes = lifes
+
+    @property
+    def dots(self):
+        if self.direction == "horisontal":
+            ship_dots = [Dot(self.head[0] + str(int(self.head[1]) + i)) for i in range(self.size)]
+            return ship_dots
+        else:
+            ship_dots = [Dot(str(int(self.head[0]) + i) + self.head[1]) for i in range(self.size)]
+            return ship_dots
+
+    @property
+    def dotvalues(self):
+        vals = [dot.v for dot in self.dots]
+        return vals
+
+
+class Board:
+    def __init__(self, ships_list=None, hide=None, count_live_ships=0):
+        self.ships_list = ships_list
+        self.hide = hide
+        self.count_live_ships = count_live_ships
+        self.board = [[f"  {chr(96 + j)}  " if i == 0 else (str(i) if j == 0 else "| O |")
+                       for j in range(6 + 1)] for i in range(6 + 1)]
+        self.board[0][0] = ""
+
+    def show_board(self):
+        for raw in self.board:
+            raw = list(map(lambda x: x.ljust(2), raw))
+            print(*raw)
+
+    # Проверка после выстрела (очерчиваем убитые корабли, считаем оставшиеся жизни)
+    def check(self, ft):
+        counter = 0
+        for ship in self.ships_list:
+            if self == player_desk:
+                ship.lifes = sum(
+                    map(lambda d: 1 if player_desk.board[d.x][d.y] == "| ■ |" else 0, ship.dots))
+            else:
+                ship.lifes = ship.size - sum(map(lambda d: 1 if ii_desk.board[d.x][d.y] == "| X |"
+                else 0, ship.dots))
+            if ship.lifes > 0:
+                counter += 1
+            else:
+                for ind in ft:
+                    f = Dot(ind)
+                    for dot in ship.dots:
+                        if abs(f.x-dot.x) == 1 and abs(f.y-dot.y) == 1 \
+                        or (abs(f.x-dot.x) == 1 and abs(f.y-dot.y) == 0 and self.board[f.x][f.y] != "| X |")\
+                        or (abs(f.x-dot.x) == 0 and abs(f.y-dot.y) == 1 and self.board[f.x][f.y] != "| X |"):
+                            self.board[f.x][f.y] = "| - |"
+            self.count_live_ships = counter
+
+
 # функция генерации кораблей. Размещаем коробаль по одному от больших к маленьким,
 # если кораблю не хватает место, то генерация запускается по новой
 def generat_ship_list():
@@ -148,78 +216,6 @@ def show_game():
     ii_desk.show_board()
 
 
-class Dot:
-    def __init__(self, ind=""):
-        self.x = int(ind[0])
-        self.y = int(ind[1])
-        self.v = ind
-
-
-class Ship:
-    status = "full"
-
-    def __init__(self, size=0, head="", direction="", lifes=0):
-        self.size = size
-        self.head = head
-        self.direction = direction
-        self.lifes = lifes
-
-    @property
-    def dots(self):
-        if self.direction == "horisontal":
-            ship_dots = [Dot(self.head[0] + str(int(self.head[1]) + i)) for i in range(self.size)]
-            return ship_dots
-        else:
-            ship_dots = [Dot(str(int(self.head[0]) + i) + self.head[1]) for i in range(self.size)]
-            return ship_dots
-
-    @property
-    def dotvalues(self):
-        vals = [dot.v for dot in self.dots]
-        return vals
-
-
-class Board:
-    def __init__(self, ships_list=None, hide=None, count_live_ships=0):
-        self.ships_list = ships_list
-        self.hide = hide
-        self.count_live_ships = count_live_ships
-        self.board = [[f"  {chr(96 + j)}  " if i == 0 else (str(i) if j == 0 else "| O |")
-                       for j in range(6 + 1)] for i in range(6 + 1)]
-        self.board[0][0] = ""
-
-    def show_board(self):
-        for raw in self.board:
-            raw = list(map(lambda x: x.ljust(2), raw))
-            print(*raw)
-
-    # Проверка после выстрела (очерчиваем убитые корабли, считаем оставшиеся жизни)
-    def check(self, ft):
-        counter = 0
-        for ship in self.ships_list:
-            if self == player_desk:
-                ship.lifes = sum(
-                    map(lambda d: 1 if player_desk.board[d.x][d.y] == "| ■ |" else 0, ship.dots))
-            else:
-                ship.lifes = ship.size - sum(map(lambda d: 1 if ii_desk.board[d.x][d.y] == "| X |"
-                else 0, ship.dots))
-            if ship.lifes > 0:
-                counter += 1
-            else:
-                for ind in ft:
-                    f = Dot(ind)
-                    for dot in ship.dots:
-                        if abs(f.x-dot.x) == 1 and abs(f.y-dot.y) == 1 \
-                        or (abs(f.x-dot.x) == 1 and abs(f.y-dot.y) == 0 and self.board[f.x][f.y] != "| X |")\
-                        or (abs(f.x-dot.x) == 0 and abs(f.y-dot.y) == 1 and self.board[f.x][f.y] != "| X |"):
-                            self.board[f.x][f.y] = "| - |"
-            self.count_live_ships = counter
-
-
-player_desk = Board(ships_list=generat_ship_list(), hide=False, count_live_ships=7)
-ii_desk = Board(ships_list=generat_ship_list(), hide=True, count_live_ships=7)
-
-
 def game():
     ii_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
     pl_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in "".join(map(str, (range(1, 6 + 1))))]
@@ -267,4 +263,7 @@ def game():
         ii_free_turns_refresh()
 
 
-game()
+if __name__ == "__main__":
+    player_desk = Board(ships_list=generat_ship_list(), hide=False, count_live_ships=7)
+    ii_desk = Board(ships_list=generat_ship_list(), hide=True, count_live_ships=7)
+    game()
