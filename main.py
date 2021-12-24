@@ -87,8 +87,19 @@ def game():
         ii_free_turns_refresh()
 
 
+# Декоратор подсчитывающий кол-во попыток генерации поля
+def count_generation(func):
+    def wrapper(*args, **kwargs):
+        wrapper.calls += 1
+        res = func(*args, **kwargs)
+        return res
+    wrapper.calls = 0
+    return wrapper
+
+
 # функция генерации кораблей. Размещаем коробаль по одному от больших к маленьким,
 # если кораблю не хватает место, то генерация запускается по новой
+@count_generation
 def generat_ship_list():
     filled_area = set()
     sizes = [3, 2, 2, 1, 1, 1, 1]
@@ -237,4 +248,6 @@ def show_game():
 if __name__ == "__main__":
     player_desk = Board(ships_list=generat_ship_list(), hide=False, count_live_ships=7)
     ii_desk = Board(ships_list=generat_ship_list(), hide=True, count_live_ships=7)
+    print(f"\n\nигровое поле генерировалось {generat_ship_list.calls} раз(а)")
     game()
+
