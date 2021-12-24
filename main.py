@@ -250,4 +250,3 @@ if __name__ == "__main__":
     ii_desk = Board(ships_list=generat_ship_list(), hide=True, count_live_ships=7)
     print(f"\n\nигровое поле генерировалось {generat_ship_list.calls} раз(а)")
     game()
-
