@@ -115,13 +115,7 @@ class Board:
             self.count_live_ships = counter
 
 
-class Game:
-    def __init__(self):
-        self.ii_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in
-                              "".join(map(str, (range(1, 6 + 1))))]
-        self.pl_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in
-                              "".join(map(str, (range(1, 6 + 1))))]
-
+class Shot:
     # Выстрел игрока
     @staticmethod
     def player_shot():
@@ -206,6 +200,15 @@ class Game:
             flag_hit = True
         return flag_hit
 
+
+class Game:
+    def __init__(self):
+        self.ii_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in
+                              "".join(map(str, (range(1, 6 + 1))))]
+        self.pl_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in
+                              "".join(map(str, (range(1, 6 + 1))))]
+
+
     # рефрешим список свободных выстрелов для ИИ
     def ii_free_turns_refresh(self):
         for raw in range(len(player_desk.board)):
@@ -233,13 +236,13 @@ class Game:
             show_game()
 
             # ходит игрок
-            flag_pl_hit, hit_massage = self.player_shot()
+            flag_pl_hit, hit_massage = Shot.player_shot()
             ii_desk.check(self.pl_free_turns)
             while flag_pl_hit and ii_desk.count_live_ships:
                 show_game()
                 print("\n\t", hit_massage)
                 print("\t\t\t\t\tВЫ СТРЕЛЯЕТЕ СНОВА")
-                flag_pl_hit, hit_massage = self.player_shot()
+                flag_pl_hit, hit_massage = Shot.player_shot()
                 ii_desk.check(self.pl_free_turns)
             if ii_desk.count_live_ships == 0:
                 show_game()
@@ -247,11 +250,11 @@ class Game:
                 break
 
             # Ходит компьютер
-            flag_ii_hit = self.ii_shot(self.ii_free_turns)
+            flag_ii_hit = Shot.ii_shot(self.ii_free_turns)
             player_desk.check(self.ii_free_turns)
             while flag_ii_hit and player_desk.count_live_ships:
                 self.ii_free_turns_refresh()
-                flag_ii_hit = self.ii_shot(self.ii_free_turns)
+                flag_ii_hit = Shot.ii_shot(self.ii_free_turns)
                 player_desk.check(self.ii_free_turns)
             self.ii_free_turns_refresh()
 
