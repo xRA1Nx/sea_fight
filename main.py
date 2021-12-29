@@ -1,6 +1,16 @@
 from random import randrange
 from clasess import Dot, Ship
-calls = 0
+
+
+class Util:
+    # Декоратор подсчитывающий кол-во попыток генерации поля
+    @staticmethod
+    def count_generation(func):
+        def wrapper(self, *args, **kwargs):
+            self.calls += 1
+            res = func(self, *args, **kwargs)
+            return res
+        return wrapper
 
 
 class Board:
@@ -14,20 +24,9 @@ class Board:
                        for j in range(6 + 1)] for i in range(6 + 1)]
         self.board[0][0] = ""
 
-    # Декоратор подсчитывающий кол-во попыток генерации поля
-    def count_generation(func):
-        def wrapper(*args, **kwargs):
-            global calls
-            wrapper.calls += 1
-            calls += 1
-            res = func(*args, **kwargs)
-            return res
-        wrapper.calls = calls
-        return wrapper
     # функция генерации кораблей. Размещаем коробаль по одному от больших к маленьким,
     # если кораблю не хватает место, то генерация запускается по новой
-
-    @count_generation
+    @Util.count_generation
     def generat_ship_list(self):
         filled_area = set()
         sizes = [3, 2, 2, 1, 1, 1, 1]
@@ -208,7 +207,6 @@ class Game:
         self.pl_free_turns = [j + i for j in "".join(map(str, (range(1, 6 + 1)))) for i in
                               "".join(map(str, (range(1, 6 + 1))))]
 
-
     # рефрешим список свободных выстрелов для ИИ
     def ii_free_turns_refresh(self):
         for raw in range(len(player_desk.board)):
@@ -264,6 +262,7 @@ if __name__ == "__main__":
     player_desk.ships_list = player_desk.generat_ship_list()
     ii_desk = Board(hide=True, count_live_ships=7)
     ii_desk.ships_list = ii_desk.generat_ship_list()
-    print(f"\n\n игровые поля генерировались {ii_desk.generat_ship_list.calls} раз(а)")
+    print(f"\n\n верхнее поле генерировалось {player_desk.calls} раз(а)")
+    print(f" нижее   поле генерировалось {ii_desk.calls} раз(а)")
     game = Game()
     game.start()
