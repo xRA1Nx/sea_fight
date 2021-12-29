@@ -2,6 +2,7 @@ from random import randrange
 from clasess import Dot, Ship
 calls = 0
 
+
 class Board:
     ships_list = None
     calls = 0
@@ -97,8 +98,8 @@ class Board:
                 ship.lifes = sum(
                     map(lambda d: 1 if player_desk.board[d.x][d.y] == "| ■ |" else 0, ship.dots))
             else:
-                ship.lifes = ship.size - sum(map(lambda d: 1 if ii_desk.board[d.x][d.y] == "| X |"
-                else 0, ship.dots))
+                ship.lifes = ship.size - \
+                             sum(map(lambda d: 1 if ii_desk.board[d.x][d.y] == "| X |" else 0, ship.dots))
             if ship.lifes > 0:
                 counter += 1
             else:
@@ -122,7 +123,8 @@ class Game:
                               "".join(map(str, (range(1, 6 + 1))))]
 
     # Выстрел игрока
-    def player_shot(self):
+    @staticmethod
+    def player_shot():
         flag = True
         hit = False
         while flag:
@@ -160,7 +162,8 @@ class Game:
 
     # Выстрел компьютера
     # Если корабль подбит то стреляет во круг него, иначе рандом выстрел на свободном поле
-    def ii_shot(self, ii_free_turns):
+    @staticmethod
+    def ii_shot(ii_free_turns):
         flag_hit = False
         priority_turns = []
         for ship in player_desk.ships_list:
